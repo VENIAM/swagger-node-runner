@@ -35,10 +35,16 @@ module.exports = function create(fittingDef, bagpipes) {
     parseRequest(req, fittingDef, function(err) {
       if (err) { /* istanbul ignore next */ return next(err); }
 
-      var params = req.swagger.params = {};
-      req.swagger.operation.parameterObjects.forEach(function(parameter) {
-        params[parameter.name] = parameter.getValue(req); // note: we do not check for errors here
-      });
+      try {
+        var params = req.swagger.params = {};
+        req.swagger.operation.parameterObjects.forEach(function(parameter) {
+          params[parameter.name] = parameter.getValue(req); // note: we do not check for errors here
+        });
+      } catch (e) {
+        e.statusCode = 400;
+        next(e);
+        return;
+      }
 
       next(null, params);
     });
